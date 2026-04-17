@@ -2,92 +2,125 @@ import random
 
 def generate_recommendations(daily_df, prediction, volatility):
     """
-    Generates rule-based recommendations for gig workers based on their data.
+    Generates high-intelligence, data-driven insights with embedded numerical facts.
     """
     recommendations = []
     
-    avg_expense = daily_df['Expense'].mean() if not daily_df.empty else 0
+    if daily_df.empty:
+        return ["👋 **Welcome!** Once you log your first shift, I will analyze your stats here."]
+
+    # 1. Net Profitability Radar
+    total_income = daily_df['Income'].sum()
+    total_tips = daily_df['Tips'].sum()
+    total_hours = daily_df['Working Hours'].sum()
+    total_expense = daily_df['Expense'].sum()
+    gross_total = total_income + total_tips
     
-    # Adaptive savings plan
-    savings_rate = 0.2
-    if volatility > 0.3:
-        savings_rate = 0.3
+    if total_hours > 0:
+        net_profit = gross_total - total_expense
+        hourly_profit = net_profit / total_hours
+        status = "🚀 **High Efficiency:**" if hourly_profit > 400 else "⚠️ **Low Efficiency:**"
         recommendations.append(
-            f"📊 **High Volatility Detected:** Your income fluctuates by {volatility*100:.0f}%. We recommend increasing your savings target to {savings_rate*100:.0f}% to build a stronger emergency fund."
+            f"{status} After expenses, you are taking home **₹{hourly_profit:,.2f} per hour**. "
+            f"You've banked ₹{net_profit:,.2f} net profit over {total_hours:,.1f} total hours."
         )
-    else:
-        recommendations.append(
-            f"💡 **Consistent Income:** Your income is relatively stable. Aim to save at least {savings_rate*100:.0f}% of your predicted income (₹{prediction * savings_rate:,.2f}) for future security."
-        )
-        
-    # Savings Deficit vs Surplus logic
-    total_income = daily_df['Income'].sum() if not daily_df.empty else 0
-    total_expense = daily_df['Expense'].sum() if not daily_df.empty else 0
-    actual_savings = total_income - total_expense
-    target_savings = total_income * savings_rate
-    
-    if total_income > 0:
-        if actual_savings < target_savings:
-            recommendations.append(f"📉 **Savings Deficit:** You've banked **₹{actual_savings:,.2f}** so far. But based on your {savings_rate*100:.0f}% safe goal against your historical income, you should actually have **₹{target_savings:,.2f}** saved. Look closely at your expense categories and cut back!")
-        else:
-            recommendations.append(f"🎉 **Savings Goal Met:** Fantastic! You've banked **₹{actual_savings:,.2f}** in pure savings, which safely tracks above your minimum strong target of ₹{target_savings:,.2f}.")
-        
-    if avg_expense > prediction:
-        recommendations.append(
-            "🚨 **Overspending Risk:** Your average daily expenses exceed your predicted income. You need to review the 'Categorization' tab and cut down on non-essential spending."
-        )
-        
-    if 'Working Hours' in daily_df.columns:
-        recent_max_hours = daily_df['Working Hours'].tail(7).max() if not daily_df.empty else 0
-        if recent_max_hours > 8:
+
+    # 2. Expense Impact Intelligence
+    if gross_total > 0:
+        expense_ratio = (total_expense / gross_total) * 100
+        if expense_ratio > 25:
             recommendations.append(
-                "😴 **Burnout Warning:** You've had shifts exceeding 8 hours recently. Prolonged over-working decreases your hourly efficiency and increases risk. Prioritize heavy rest days soon!"
+                f"🚩 **High Overhead:** Expenses are consuming **{expense_ratio:.1f}%** of your gross earnings. "
+                "For gig workers, overhead above 20% usually indicates high fuel waste or maintenance issues."
             )
+        else:
+            recommendations.append(
+                f"✅ **Lean Operation:** Excellent overhead control! Only **{expense_ratio:.1f}%** of your income went to expenses."
+            )
+
+    # 3. Weekly Burnout Radar
+    recent_7_days_hours = daily_df['Working Hours'].tail(7).sum()
+    if recent_7_days_hours > 55:
+        recommendations.append(
+            f"🚨 **Extreme Burnout Zone:** You have pushed **{recent_7_days_hours:.1f} hours** in the last 7 days. "
+            "Exceeding 55 hours weekly leads to a 33% higher risk of health issues. Schedule a rest day immediately."
+        )
+    elif recent_7_days_hours > 40:
+        recommendations.append(
+            f"🕒 **Standard Full-Time:** You've clocked **{recent_7_days_hours:.1f} hours** this week. Fatigue management is recommended."
+        )
+
+    # 4. Volatility Protection
+    safe_reserve = total_expense * 2.5 # 2.5 months of avg expenses as a safe buffer
+    if volatility > (prediction * 0.3):
+        recommendations.append(
+            f"📊 **Income Volatility:** Your income swings by **₹{volatility:,.2f}** day-to-day. "
+            f"To survive lean months, you should aim for a **₹{safe_reserve:,.2f}** emergency buffer."
+        )
     
-    # Adaptive savings plan
-    savings_rate = 0.2
-    if volatility > (prediction * 0.4):
-        savings_rate = 0.3 # Save more if highly volatile
-        
-    recommended_savings = prediction * savings_rate
+    # 5. Tax Compliance Fact
+    tax_setaside = gross_total * 0.25
     recommendations.append(
-        f"💡 **Savings Plan:** Based on your current income trend, try to save **₹{recommended_savings:.2f}** tomorrow (approx {savings_rate * 100}% of predicted income)."
+        f"🏛️ **Tax Obligation:** Based on your earnings of ₹{gross_total:,.2f}, you should have **₹{tax_setaside:,.2f}** "
+        "set aside for taxes today. Do not spend this amount!"
     )
-    
+
     return recommendations
 
-def ai_financial_response(query, daily_df_dict):
+def ai_financial_response(query, daily_df):
     """
-    A rule-based chatbot replacement for financial advice based on simple NLP.
+    Advanced data-driven chatbot that uses real session stats to answer questions.
     """
     query = query.lower()
     
+    # Calculate key stats for the response
+    tot_inc = daily_df['Income'].sum() if not daily_df.empty else 0
+    tot_exp = daily_df['Expense'].sum() if not daily_df.empty else 0
+    net_sav = tot_inc - tot_exp
+    avg_monthly_exp = daily_df['Expense'].mean() * 30 if not daily_df.empty else 0
+    
     if any(word in query for word in ['tax', 'taxes']):
-        return "Based on standard independent contractor rules, it's generally advised to set aside 25-30% of your net income for taxes. Make sure you are tracking all deductible business expenses!"
+        tax_est = tot_inc * 0.25
+        return f"Based on your gross income of ₹{tot_inc:,.2f}, you should reserve ₹{tax_est:,.2f} (25%) for taxes. You currently have ₹{net_sav:,.2f} in net savings."
     
+    elif any(word in query for word in ['loan', 'borrow', 'debt', 'emi']):
+        if daily_df.empty:
+            return "I need some data to analyze your loan eligibility. Please enter your finances first!"
+        
+        # Risk Analysis
+        months_buffer = net_sav / avg_monthly_exp if avg_monthly_exp > 0 else 0
+        
+        analysis = ""
+        if months_buffer > 3:
+            analysis = (f"📊 **Data-Driven Analysis:** Your ₹{net_sav:,.2f} savings cover **{months_buffer:.1f} months** of expenses. This is a very strong 'Safety Shield'.\n\n")
+        else:
+            analysis = (f"⚠️ **Warning:** Your savings (₹{net_sav:,.2f}) only cover **{months_buffer:.1f} months**. Taking a loan now is high-risk.\n\n")
+
+        tips = (
+            "✅ **Pros:** Can help with big necessary purchases (like a new bike) or consolidate high-interest debt.\n"
+            "❌ **Cons:** EMI is a fixed cost while gig income is variable; one bad week can lead to a missed payment.\n\n"
+            "💡 **Expert Tips for You:**\n"
+            "1. **The 15% Rule:** Never let your total monthly EMIs exceed 15% of your average monthly gig income.\n"
+            "2. **Interest Check:** Avoid 'Instant App' loans; their high interest rates (36%+) can trap gig workers in a debt cycle.\n"
+            "3. **Rainy Day:** Always keep at least 1 month's EMI amount extra in your account at all times."
+        )
+        return analysis + tips
+
     elif any(word in query for word in ['save', 'savings', 'emergency']):
-        return "For gig workers, a 3-6 month emergency fund is crucial due to variable income. Look at your average monthly expenses and multiply by 3 to get your minimum goal."
+        target = avg_monthly_exp * 3
+        deficit = target - net_sav
+        if deficit > 0:
+            return f"Your current savings are ₹{net_sav:,.2f}. To be safe, you need a 3-month fund of ₹{target:,.2f}. You are ₹{deficit:,.2f} away from your safety goal."
+        return f"Amazing! Your ₹{net_sav:,.2f} savings have already exceeded your 3-month safety target of ₹{target:,.2f}. You are financially secure!"
         
-    elif any(word in query for word in ['invest', 'investing', 'stocks']):
-        return "Before investing heavily in stocks, ensure your high-interest debt is paid off and your emergency fund is fully funded. Once ready, look into low-cost index funds or a Solo 401(k) / SEP IRA if self-employed."
-        
-    elif any(word in query for word in ['budget', 'spending', 'expense']):
-        tot_inc = daily_df['Income'].sum() if not daily_df.empty else 0
-        return f"Based on your total historical income of ₹{tot_inc:,.2f}, applying the strict 50/30/20 budget means you should allocate: ₹{tot_inc*0.5:,.2f} for Needs (50%), ₹{tot_inc*0.3:,.2f} for Wants (30%), and ₹{tot_inc*0.2:,.2f} for Savings/Debt (20%)."
-        
-    elif any(word in query for word in ['overwork', 'hours', 'long', 'tired', 'burnout']):
-        return "As a gig worker, it's easy to fall into the trap of overworking. For safety and health, try to limit gig shifts to 10-12 hours per day and plan at least one dedicated day off per week."
-        
-    elif any(word in query for word in ['water', 'drink', 'hydrate', 'thirst']):
-        return "Staying hydrated directly impacts your focus and energy on the road! Keep a large reusable water bottle with you and aim to drink a little every hour. Set a timer if you need to!"
-        
-    elif any(word in query for word in ['food', 'lunch', 'dinner', 'break', 'meal', 'hungry']):
-        return "Don't work completely straight through meals! For peak efficiency and wellbeing, take a dedicated 30-minute food/rest break every 4-6 hours. It pays off in better energy for the remainder of your shift."
-    
+    elif any(word in query for word in ['invest', 'stocks', 'mutual']):
+        if net_sav < (avg_monthly_exp * 2):
+            return "I don't recommend investing in stocks yet. You first need a larger emergency buffer. Keep saving until you have at least 2 months of expenses safe."
+        return "You have a solid buffer! You could consider low-risk investments with any surplus above your emergency fund."
+
+    elif any(word in query for word in ['overwork', 'burnout', 'hours']):
+        tot_hrs = daily_df['Working Hours'].sum()
+        return f"You've logged {tot_hrs:.1f} total hours. If this averages to more than 50 hours a week, I recommend a 48-hour total disconnect to refresh your focus."
+
     else:
-        responses = [
-            "That's a great question! While I am a simple AI, I'd recommend looking at your expense breakdown to find areas to optimize.",
-            "As a gig worker, consistency is key. Always prioritize building a buffer for lean months.",
-            "I can't answer that perfectly, but tracking your income vs expenses clearly is the first step to financial freedom!"
-        ]
-        return random.choice(responses)
+        return "I can help with specific questions about your **Taxes**, **Loan Eligibility**, **Savings Goals**, or **Burnout**. Try asking: 'Can I afford a loan?'"
