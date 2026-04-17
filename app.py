@@ -8,7 +8,7 @@ import utils.analysis as ana
 import utils.visualization as vis
 import utils.advisor as adv
 
-# --- 1. FULL LANGUAGE DICTIONARY (7 LANGUAGES) ---
+# --- 1. LANGUAGE DICTIONARY (7 LANGUAGES) ---
 LANGUAGES = {
     "English": {
         "title": "Gig Worker AI Finance Coach", "dashboard_title": "👑 Financial Overview Dashboard",
@@ -32,8 +32,8 @@ LANGUAGES = {
         "save_goal": "लक्ष्य सहेजें", "save_data": "डेटा सहेजें 💾", "process": "प्रोसेस करें 🚀"
     },
     "Urdu / اردو": {"title": "فنانس کوچ", "dashboard_title": "👑 مالیاتی جائزہ", "total_income": "کل آمدنی", "total_expenses": "کل اخراجات", "net_savings": "خالص بچت", "predicted_next_day": "اگلے دن کی پیشن گوئی", "tab1": "📈 رجحانات", "tab2": "📁 زمرہ جات", "tab3": "💡 سفارشات", "tab4": "💬 چیٹ بوٹ", "goal_tracker": "🎯 ہدف کا سراغ لگانا", "save_goal": "ہدف محفوظ کریں", "save_data": "ڈیٹا محفوظ کریں 💾", "process": "عمل درآمد 🚀"},
-    "Telugu / తెలుగు": {"title": "AI ఫైనాన్స్ కోచ్", "dashboard_title": "👑 ఆర్థిక అవలోకనం", "total_income": "మొత్తం ఆదాయం", "total_expenses": "మొత్తం ఖర్చులు", "net_savings": "నికర పొదుపు", "predicted_next_day": "తర్వాతి రోజు అంచనా", "tab1": "📈 ధోరణులు", "tab2": "📁 వర్గాలు", "tab3": "💡 సిఫార్సులు", "tab4": "💬 చాట్‌బాట్", "goal_tracker": "🎯 లక్ష్యం", "save_goal": "లక్ష్యాన్ని సేవ్ చేయండి", "save_data": "డేటాను సేవ్ చేయి 💾", "process": "ప్రాసెస్ చేయండి 🚀"},
-    "Kannada / ಕನ್ನಡ": {"title": "AI ಹಣಕಾಸು ತರಬೇತುದಾರ", "dashboard_title": "👑 ಆರ್ಥಿಕ ಅವಲೋಕನ", "total_income": "ಒಟ್ಟು ಆದಾಯ", "total_expenses": "ಒಟ್ಟು ವೆಚ್ಚಗಳು", "net_savings": "ನಿವ್ವಳ ಉಳಿತಾಯ", "predicted_next_day": "ಮುಂದಿನ ದಿನದ ಮುನ್ಸೂಚನೆ", "tab1": "📈 ಪ್ರವೃತ್ತಿಗಳು", "tab2": "📁 ವರ್ಗಗಳು", "tab3": "💡 ಶಿಫಾರಸುಗಳು", "tab4": "💬 ಚಾಟ್‌ಬಾಟ್", "goal_tracker": "🎯 ಗುರಿ", "save_goal": "ಗುರಿ ಉಳಿಸಿ", "save_data": "ಉಳಿಸಿ 💾", "process": "ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಿ 🚀"},
+    "Telugu / తెలుగు": {"title": "AI ఆర్థిక కోచ్", "dashboard_title": "👑 ఆర్థిక అవలోకనం", "total_income": "మొత్తం ఆదాయం", "total_expenses": "మొత్తం ఖర్చులు", "net_savings": "నికర పొదుపు", "predicted_next_day": "తర్వాతి రోజు అంచనా", "tab1": "📈 ధోరణులు", "tab2": "📁 వర్గాలు", "tab3": "💡 సిఫార్సులు", "tab4": "💬 చాట్‌బాట్", "goal_tracker": "🎯 లక్ష్యం", "save_goal": "లక్ష్యాన్ని సేవ్ చేయండి", "save_data": "డేటాను సేవ్ చేయి 💾", "process": "ప్రాసెస్ చేయండి 🚀"},
+    "Kannada / ಕನ್ನಡ": {"title": "AI ಹಣಕಾಸು ತರಬೇತುದಾರ", "dashboard_title": "👑 ಆರ್ಥಿಕ ಅವಲೋಕನ", "total_income": "ಒಟ್ಟು ಆದಾಯ", "total_expenses": "ಒಟ್ಟು ವೆಚ್ಚಗಳು", "net_savings": "ನಿವ್ವಳ ಉಳಿತಾಯ", "predicted_next_day": "ಮುಂದಿನ ದಿನದ ಮುన్ಸೂಚನೆ", "tab1": "📈 ಪ್ರವೃತ್ತಿಗಳು", "tab2": "📁 ವರ್ಗಗಳು", "tab3": "💡 ಶಿಫารಸುಗಳು", "tab4": "💬 ಚಾಟ್‌ಬಾಟ್", "goal_tracker": "🎯 ಗುರಿ", "save_goal": "ಗುರಿ ಉಳಿಸಿ", "save_data": "ಉಳಿಸಿ 💾", "process": "ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಿ 🚀"},
     "Malayalam / മലയാളം": {"title": "AI ഫിനാൻസ് കോച്ച്", "dashboard_title": "👑 സാമ്പത്തിക അവലോകനം", "total_income": "ആകെ വരുമാനം", "total_expenses": "ആകെ ചെലവുകൾ", "net_savings": "അറ്റാദായം", "predicted_next_day": "അടുത്ത ദിവസത്തെ പ്രവചനം", "tab1": "📈 ട്രെൻഡുകൾ", "tab2": "📁 വിഭാഗങ്ങൾ", "tab3": "💡 ശുപാർശകൾ", "tab4": "💬 ചാറ്റ്ബോട്ട്", "goal_tracker": "🎯 ലക്ഷ്യം", "save_goal": "ലക്ഷ്യം സേവ് ചെയ്യുക", "save_data": "സേവ് ചെയ്യുക 💾", "process": "പ്രോസസ്സ് ചെയ്യുക 🚀"}
 }
 
@@ -80,7 +80,7 @@ if os.path.exists(get_user_profile_file(USER_ID)):
     user_name = pd.read_csv(get_user_profile_file(USER_ID)).iloc[0]['Name']
 else: user_name = USER_ID
 
-# Sidebar
+# Sidebar Setup
 with st.sidebar:
     st.title(f"👑 {user_name}")
     if st.button("Exit Vault"):
@@ -109,22 +109,25 @@ with st.sidebar:
         st.session_state.goals_df.to_csv("goals_history.csv", index=False)
         st.success("Set!")
 
-# Manual Entry Logic
+# Manual Entry Setup
 if "manual_df" not in st.session_state:
-    st.session_state.manual_df = pd.read_csv(LOCAL_SAVE_FILE) if os.path.exists(LOCAL_SAVE_FILE) else pd.DataFrame(columns=["Date", "Income", "Tips", "Working Hours", "Expense", "Category", "Description"])
+    if os.path.exists(LOCAL_SAVE_FILE):
+        st.session_state.manual_df = pd.read_csv(LOCAL_SAVE_FILE)
+        st.session_state.manual_df['Date'] = pd.to_datetime(st.session_state.manual_df['Date'])
+    else:
+        st.session_state.manual_df = pd.DataFrame(columns=["Date", "Income", "Tips", "Working Hours", "Expense", "Category", "Description"])
 
 if input_method == "Manual Entry":
-    st.title(f"Financial Entry ✍️")
+    st.title("Financial Entry ✍️")
     ed = st.data_editor(st.session_state.manual_df, num_rows="dynamic", use_container_width=True)
     c_p, c_s = st.columns(2)
     if c_p.button(t["process"], type="primary"):
         st.session_state.manual_df = ed
-        st.session_state.is_processed = True
     if c_s.button(t["save_data"]):
         ed.to_csv(LOCAL_SAVE_FILE, index=False)
         st.success("Saved!")
 
-# Processing & Visuals
+# Processing Logic
 data = None
 if input_method == "Manual Entry" and not st.session_state.manual_df.empty: data = st.session_state.manual_df
 elif input_method == "Upload CSV" and uploaded_file: data = uploaded_file
@@ -138,9 +141,9 @@ if data is not None:
 
     st.title(t["dashboard_title"])
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric(t["total_income"], f"₹{df['Income'].sum()+df['Tips'].sum():,.0f}", delta="Income", delta_color="normal")
+    m1.metric(t["total_income"], f"₹{df['Income'].sum()+df['Tips'].sum():,.0f}", delta="Income")
     m2.metric(t["total_expenses"], f"₹{df['Expense'].sum():,.0f}", delta="Costs", delta_color="inverse")
-    m3.metric(t["net_savings"], f"₹{(df['Income'].sum()+df['Tips'].sum())-df['Expense'].sum():,.0f}", delta="Profit", delta_color="normal")
+    m3.metric(t["net_savings"], f"₹{(df['Income'].sum()+df['Tips'].sum())-df['Expense'].sum():,.0f}", delta="Profit")
     m4.metric(t["predicted_next_day"], f"₹{pred:,.0f}", delta="Forecast")
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs([t["tab1"], t["tab2"], t["tab3"], t["tab4"], "🏆 History"])
@@ -158,8 +161,28 @@ if data is not None:
     with tab5:
         st.subheader("🏆 Your Goal Wall of Fame")
         st.dataframe(st.session_state.goals_df, use_container_width=True, hide_index=True)
-
-
-
-
-
+else:
+    st.markdown(f"""
+        <div style="background-color: #f0f7ff; padding: 30px; border-radius: 15px; border-left: 10px solid #1e3a8a;">
+            <h1 style="color: #1e3a8a;">👋 Welcome to Your AI Finance Coach!</h1>
+            <p style="font-size: 18px; color: #334155;">
+                This workspace is designed specifically for <b>Gig Workers</b> to help you master your earnings and expenses.
+            </p>
+            <div style="display: flex; gap: 20px; margin-top: 20px;">
+                <div style="background: white; padding: 15px; border-radius: 10px; flex: 1; box-shadow: 2px 2px 10px rgba(0,0,0,0.05);">
+                    <h4>📊 Data Entry</h4>
+                    <p>Use the <b>Sidebar</b> to upload your CSV payout files or enter shifts manually.</p>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 10px; flex: 1; box-shadow: 2px 2px 10px rgba(0,0,0,0.05);">
+                    <h4>🤖 AI Advisor</h4>
+                    <p>Receive real-time tips on fuel efficiency, burnout risk, and tax set-asides.</p>
+                </div>
+                <div style="background: white; padding: 15px; border-radius: 10px; flex: 1; box-shadow: 2px 2px 10px rgba(0,0,0,0.05);">
+                    <h4>🎯 Smart Goals</h4>
+                    <p>Set savings targets and track your journey in the <b>Wall of Fame</b>.</p>
+                </div>
+            </div>
+            <br>
+            <p style="font-style: italic; color: #64748b;">👈 Please select an input method in the sidebar to get started!</p>
+        </div>
+    """, unsafe_allow_html=True)
