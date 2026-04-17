@@ -24,8 +24,12 @@ def load_and_clean_data(file_or_df):
         }
         df = df.rename(columns=col_map)
         
-        # Convert Date using DayFirst format for DD-MM-YYYY
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce', dayfirst=True)
+        # Force strict DD-MM-YYYY parsing to prevent April (04) being read as June
+        df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y', errors='coerce')
+        
+        # If strict format fails (user used / instead of -), use flexible parsing as fallback
+        if df['Date'].isna().all():
+            df['Date'] = pd.to_datetime(df['Date'], dayfirst=True, errors='coerce')
         
         # Handing missing values: Income and Expense defaults to 0
         df['Income'] = pd.to_numeric(df['Income'], errors='coerce').fillna(0)
