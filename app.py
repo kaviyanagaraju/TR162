@@ -93,15 +93,32 @@ if not st.session_state.authenticated:
     st.stop()
 
 # --- MAIN APP SETUP ---
-USER_NAME = st.session_state.username
-LOCAL_SAVE_FILE = get_user_data_file(USER_NAME)
+if not st.session_state.authenticated:
+    st.stop()
+    
+USER_ID = st.session_state.username
+LOCAL_SAVE_FILE = get_user_data_file(USER_ID)
+
+# Reset manual_df for the current logged in user if not matching session
+if "current_user_local" not in st.session_state or st.session_state.current_user_local != USER_ID:
+    st.session_state.current_user_local = USER_ID
+    if os.path.exists(LOCAL_SAVE_FILE):
+        st.session_state.manual_df = pd.read_csv(LOCAL_SAVE_FILE)
+        if 'Date' in st.session_state.manual_df.columns:
+            st.session_state.manual_df['Date'] = pd.to_datetime(st.session_state.manual_df['Date'], errors='coerce')
+    else:
+        # PURE EMPTY STATE for new users
+        st.session_state.manual_df = pd.DataFrame(columns=[
+            "Date", "Income", "Tips", "Working Hours", "Expense", "Category", "Description"
+        ])
+        st.session_state.manual_df['Date'] = pd.to_datetime(st.session_state.manual_df['Date'])
 
 # Load Bio for display
-if os.path.exists(get_user_profile_file(USER_NAME)):
-    prod_df = pd.read_csv(get_user_profile_file(USER_NAME))
+if os.path.exists(get_user_profile_file(USER_ID)):
+    prod_df = pd.read_csv(get_user_profile_file(USER_ID))
     user_bio = prod_df.iloc[0]
 else:
-    user_bio = {"Name": USER_NAME, "Age": "?", "Gig": "Independent"}
+    user_bio = {"Name": USER_ID, "Age": "?", "Gig": "Independent"}
 
 # --- PAGE CONFIG ---
 st.set_page_config(
