@@ -16,26 +16,28 @@ def load_and_clean_data(file_or_df):
         # Standardize column headers to title case and strip whitespace
         df.columns = [col.strip().title() for col in df.columns]
         
-        req_columns = ['Date', 'Income', 'Expense', 'Description']
+        # Smart column renaming for Excel-style headers
+        col_map = {
+            'Working H': 'Working Hours',
+            'Work Hours': 'Working Hours',
+            'Cat': 'Category'
+        }
+        df = df.rename(columns=col_map)
         
-        missing_cols = [col for col in req_columns if col not in df.columns]
-        if missing_cols:
-            return None, f"Missing required columns: {', '.join(missing_cols)}"
-            
         # Convert Date using DayFirst format for DD-MM-YYYY
         df['Date'] = pd.to_datetime(df['Date'], errors='coerce', dayfirst=True)
         
         # Handing missing values: Income and Expense defaults to 0
-        df['Income'] = df['Income'].fillna(0).astype(float)
-        df['Expense'] = df['Expense'].fillna(0).astype(float)
+        df['Income'] = pd.to_numeric(df['Income'], errors='coerce').fillna(0)
+        df['Expense'] = pd.to_numeric(df['Expense'], errors='coerce').fillna(0)
         
         if 'Tips' not in df.columns:
             df['Tips'] = 0.0
-        df['Tips'] = df['Tips'].fillna(0).astype(float)
+        df['Tips'] = pd.to_numeric(df['Tips'], errors='coerce').fillna(0)
         
         if 'Working Hours' not in df.columns:
             df['Working Hours'] = 0.0
-        df['Working Hours'] = df['Working Hours'].fillna(0).astype(float)
+        df['Working Hours'] = pd.to_numeric(df['Working Hours'], errors='coerce').fillna(0)
         
         # Drop rows where Date is NaT
         df = df.dropna(subset=['Date'])
