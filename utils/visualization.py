@@ -43,14 +43,13 @@ def plot_income_trend(daily_df, lean_days, threshold):
         fig.add_hline(y=threshold, line_dash="dash", line_color="orange", 
                       annotation_text="Lean Threshold", annotation_position="bottom right")
                       
-    # Highlight Lean Months markers
-    if lean_days_df is not None and not lean_days_df.empty:
+    # Highlight Lean Periods
+    if lean_days is not None and not lean_days.empty:
         fig.add_trace(go.Scatter(
-            x=lean_days_df['Date'],
-            y=lean_days_df['Income'],
-            mode='markers',
-            name='Lean Period',
-            marker=dict(color='red', size=12, symbol='x')
+            x=lean_days['Date'], y=lean_days['Income'] + lean_days['Tips'],
+            mode='markers', name='Lean Period',
+            marker=dict(color='#e74c3c', size=12, symbol='x'),
+            hovertemplate='LEAN PERIOD ALERT<br>Date: %{x}'
         ))
 
     fig.update_layout(
