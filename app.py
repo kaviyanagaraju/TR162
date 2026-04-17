@@ -400,21 +400,17 @@ elif input_method == "Manual Entry":
     LOCAL_SAVE_FILE = "saved_finances.csv"
     
     if "manual_df" not in st.session_state or "Working Hours" not in st.session_state.manual_df.columns:
-        import os
         if os.path.exists(LOCAL_SAVE_FILE):
             saved_df = pd.read_csv(LOCAL_SAVE_FILE)
             if 'Date' in saved_df.columns:
                 saved_df['Date'] = pd.to_datetime(saved_df['Date'], errors='coerce')
-                
-            # Ensure new columns exist in old saves
-            if 'Working Hours' not in saved_df.columns:
-                saved_df['Working Hours'] = 0.0
-                
             st.session_state.manual_df = saved_df
         else:
+            # Strictly empty dataframe with correct columns for new users
             st.session_state.manual_df = pd.DataFrame(columns=[
                 "Date", "Income", "Tips", "Working Hours", "Expense", "Category", "Description"
             ])
+            # Set Date column type for the date picker
             st.session_state.manual_df['Date'] = pd.to_datetime(st.session_state.manual_df['Date'])
         
     edited_df = st.data_editor(
