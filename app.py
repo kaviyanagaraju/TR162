@@ -5,14 +5,112 @@ import utils.categorization as cat
 import utils.analysis as ana
 import utils.visualization as vis
 import utils.advisor as adv
+import os
+import datetime
+
+# --- PRIVATE DATA ISOLATION LOGIC ---
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+if 'username' not in st.session_state:
+    st.session_state.username = None
+
+def get_user_data_file(username):
+    return f"data_private_{username}.csv"
+
+def get_user_profile_file(username):
+    return f"profile_{username}.csv"
+
+def get_users_db_file():
+    return "users_database.csv"
+
+# --- LOGIN / SIGNUP UI ---
+if not st.session_state.authenticated:
+    st.set_page_config(page_title="AI Finance Coach - Login", layout="centered")
+    
+    st.markdown("""
+        <style>
+        .stApp {
+            background-color: #f8f9fa;
+        }
+        .login-header {
+            text-align: center;
+            padding: 20px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<div class='login-header'><h1>🔐 Gig Worker Vault</h1><p>Private Financial Dashboard Login</p></div>", unsafe_allow_html=True)
+
+    tab_login, tab_signup = st.tabs(["Login", "Create Private Account"])
+    
+    with tab_login:
+        login_user = st.text_input("Username", key="l_user")
+        login_pass = st.text_input("Password", type="password", key="l_pass")
+        if st.button("Unlock Dashboard"):
+            users_db = get_users_db_file()
+            if os.path.exists(users_db):
+                users_df = pd.read_csv(users_db)
+                user_match = users_df[(users_df['username'] == login_user) & (users_df['password'] == login_pass)]
+                if not user_match.empty:
+                    st.session_state.authenticated = True
+                    st.session_state.username = login_user
+                    st.rerun()
+                else:
+                    st.error("Invalid credentials.")
+            else:
+                st.error("No users registered.")
+                
+    with tab_signup:
+        new_user = st.text_input("Username", key="s_user")
+        new_pass = st.text_input("Password", type="password", key="s_pass")
+        st.markdown("---")
+        st.subheader("Your Bio Details")
+        full_name = st.text_input("Name")
+        age = st.number_input("Age", min_value=18, max_value=80, value=25)
+        gig_type = st.selectbox("Role", ["Delivery", "Ride-share", "Freelance", "Other"])
+        
+        if st.button("Register & Create Private Vault"):
+            if new_user and new_pass and full_name:
+                users_db = get_users_db_file()
+                user_row = pd.DataFrame([{"username": new_user, "password": new_pass}])
+                
+                if os.path.exists(users_db):
+                    all_users = pd.read_csv(users_db)
+                    if new_user in all_users['username'].values:
+                        st.warning("Username exists.")
+                        st.stop()
+                    all_users = pd.concat([all_users, user_row], ignore_index=True)
+                    all_users.to_csv(users_db, index=False)
+                else:
+                    user_row.to_csv(users_db, index=False)
+                
+                # Save bio
+                profile_df = pd.DataFrame([{"Name": full_name, "Age": age, "Gig": gig_type}])
+                profile_df.to_csv(get_user_profile_file(new_user), index=False)
+                st.success("Registered! Switch to Login.")
+            else:
+                st.warning("Please fill Bio data.")
+    st.stop()
+
+# --- MAIN APP SETUP ---
+USER_NAME = st.session_state.username
+LOCAL_SAVE_FILE = get_user_data_file(USER_NAME)
+
+# Load Bio for display
+if os.path.exists(get_user_profile_file(USER_NAME)):
+    prod_df = pd.read_csv(get_user_profile_file(USER_NAME))
+    user_bio = prod_df.iloc[0]
+else:
+    user_bio = {"Name": USER_NAME, "Age": "?", "Gig": "Independent"}
 
 # --- PAGE CONFIG ---
 st.set_page_config(
-    page_title="Gig Worker AI Finance Coach",
+    page_title=f"Coach | {user_bio['Name']}",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
 
 # --- CUSTOM STYLES ---
 st.markdown("""
@@ -206,6 +304,14 @@ TRANS = {
 
 # --- SIDEBAR ---
 with st.sidebar:
+    st.markdown(f"### 👤 Logged in as: **{user_bio['Name']}**")
+    st.caption(f"{user_bio['Gig']} worker | Age: {user_bio['Age']}")
+    if st.button("Logout"):
+        st.session_state.authenticated = False
+        st.session_state.username = None
+        st.rerun()
+    st.markdown("---")
+    
     st.image("https://cdn-icons-png.flaticon.com/512/3135/3135715.png", width=100)
     
     language = st.selectbox("Language / மொழி / زبان / భాష / ಭಾಷೆ / ഭാഷ", list(TRANS.keys()))
