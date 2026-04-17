@@ -154,8 +154,15 @@ if data is not None:
     m4.metric(t["predicted_next_day"], f"₹{pred:,.0f}", delta="Forecast")
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs([t["tab1"], t["tab2"], t["tab3"], t["tab4"], "🏆 History"])
-    with tab1: st.plotly_chart(vis.plot_income_trend(daily_df, lean, thresh), use_container_width=True)
-    with tab2: st.plotly_chart(vis.plot_expense_distribution(df), use_container_width=True)
+    with tab1:
+        fig_t = vis.plot_income_trend(daily_df, lean, thresh)
+        if fig_t: st.plotly_chart(fig_t, use_container_width=True)
+        else: st.warning("No trend data available for these dates.")
+        
+    with tab2:
+        fig_p = vis.plot_expense_distribution(df)
+        if fig_p: st.plotly_chart(fig_p, use_container_width=True)
+        else: st.warning("No category data found.")
     with tab3:
         for r in adv.generate_recommendations(daily_df, pred, vol):
             if "🚨" in r or "🚩" in r: st.error(r)
