@@ -119,7 +119,14 @@ if "manual_df" not in st.session_state:
 
 if input_method == "Manual Entry":
     st.title("Financial Entry ✍️")
-    ed = st.data_editor(st.session_state.manual_df, num_rows="dynamic", use_container_width=True)
+    col_config = {
+        "Date": st.column_config.DateColumn("Date", format="DD-MM-YYYY", required=True),
+        "Income": st.column_config.NumberColumn("Income (₹)", min_value=0),
+        "Tips": st.column_config.NumberColumn("Tips (₹)", min_value=0),
+        "Expense": st.column_config.NumberColumn("Expense (₹)", min_value=0),
+        "Category": st.column_config.SelectboxColumn("Category", options=["Food", "Fuel", "Rent", "Bills", "Others"])
+    }
+    ed = st.data_editor(st.session_state.manual_df, column_config=col_config, num_rows="dynamic", use_container_width=True)
     c_p, c_s = st.columns(2)
     if c_p.button(t["process"], type="primary"):
         st.session_state.manual_df = ed
