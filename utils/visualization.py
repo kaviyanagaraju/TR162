@@ -2,30 +2,40 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
-def plot_income_trend(daily_df, lean_days_df=None, threshold=None):
+def plot_income_trend(daily_df, lean_days, threshold):
     """
-    Plots a line chart of income over time. Highlights lean periods.
+    Plots daily income and savings trends with lean period highlighting.
     """
+    if daily_df.empty:
+        return None
+    
+    # Calculate daily savings
+    daily_df['Savings'] = daily_df['Income'] + daily_df['Tips'] - daily_df['Expense']
+        
     fig = go.Figure()
     
     # Income Line
     fig.add_trace(go.Scatter(
-        x=daily_df['Date'],
-        y=daily_df['Income'],
-        mode='lines+markers',
-        name='Income',
+        x=daily_df['Date'], y=daily_df['Income'] + daily_df['Tips'],
+        mode='lines+markers', name='Total Income',
         line=dict(color='#2ecc71', width=3),
-        marker=dict(size=8)
+        hovertemplate='Date: %{x}<br>Income: ₹%{y:,.2f}'
     ))
     
-    # Expense Line
+    # Savings Line (New)
     fig.add_trace(go.Scatter(
-        x=daily_df['Date'],
-        y=daily_df['Expense'],
-        mode='lines+markers',
-        name='Expense',
-        line=dict(color='#e74c3c', width=3),
-        marker=dict(size=8)
+        x=daily_df['Date'], y=daily_df['Savings'],
+        mode='lines+markers', name='Net Savings',
+        line=dict(color='#3498db', width=3, dash='dot'),
+        hovertemplate='Date: %{x}<br>Savings: ₹%{y:,.2f}'
+    ))
+    
+    # Threshold Line
+    fig.add_trace(go.Scatter(
+        x=daily_df['Date'], y=[threshold]*len(daily_df),
+        mode='lines', name='Lean Threshold',
+        line=dict(color='#e74c3c', width=1, dash='dash'),
+        hoverinfo='skip'
     ))
     
     # Highlight Threshold
