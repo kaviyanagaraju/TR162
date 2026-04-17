@@ -24,12 +24,19 @@ def load_and_clean_data(file_or_df):
         }
         df = df.rename(columns=col_map)
         
-        # Force strict DD-MM-YYYY parsing to prevent April (04) being read as June
-        df['Date'] = pd.to_datetime(df['Date'], format='%d-%m-%Y', errors='coerce')
-        
-        # If strict format fails (user used / instead of -), use flexible parsing as fallback
-        if df['Date'].isna().all():
-            df['Date'] = pd.to_datetime(df['Date'], dayfirst=True, errors='coerce')
+        # Multi-stage date parser for maximum compatibility
+        def parse_dates(col):
+            # Try strict DD-MM-YYYY first
+            res = pd.to_datetime(col, format='%d-%m-%Y', errors='coerce')
+            # If failed, try DD/MM/YYYY
+            if res.isna().all():
+                res = pd.to_datetime(col, format='%d/%m/%Y', errors='coerce')
+            # Final fallback to standard pandas guessing
+            if res.isna().all():
+                res = pd.to_datetime(col, dayfirst=True, errors='coerce')
+            return res
+
+        df['Date'] = parse_dates(df['Date'])
         
         # Handing missing values: Income and Expense defaults to 0
         df['Income'] = pd.to_numeric(df['Income'], errors='coerce').fillna(0)
