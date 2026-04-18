@@ -8,36 +8,46 @@ def load_and_clean_data(file_or_df):
         else:
             df = pd.read_csv(file_or_df)
         
+        # Standardize headers
         df.columns = [col.strip().title() for col in df.columns]
         
-        # Manual Date Splitter (Bulletproof Fix)
-        def force_day_first(date_str):
-            try:
-                date_str = str(date_str).replace('/', '-')
-                parts = date_str.split('-')
-                if len(parts) == 3:
-                     # Force: Day-Month-Year (e.g. 06-04-2026)
-                     return pd.Timestamp(year=int(parts[2]), month=int(parts[1]), day=int(parts[0]))
-                return pd.to_datetime(date_str, dayfirst=True)
-            except:
-                return pd.NaT
-
-        df['Date'] = df['Date'].apply(force_day_first)
-        
-        # Standardize Numbers
+        # Fuzzy Rename
         col_map = {'Working H': 'Working Hours', 'Work Hours': 'Working Hours', 'Cat': 'Category'}
         df = df.rename(columns=col_map)
+
+        # Smart Multi-Format Parser
+        def smart_date(col):
+            # Try 1: Strict DD-MM-YYYY (April Fix)
+            res = pd.to_datetime(col, format='%d-%m-%Y', errors='coerce')
+            # Try 2: Strict DD/MM/YYYY
+            if res.isna().sum() > len(res) * 0.5:
+                res = pd.to_datetime(col, format='%d/%m/%Y', errors='coerce')
+            # Try 3: General DayFirst
+            if res.isna().sum() > len(res) * 0.5:
+                res = pd.to_datetime(col, dayfirst=True, errors='coerce')
+            return res
+
+        df['Date'] = smart_date(df['Date'])
         
+        # Drop rows with no dates
+        df = df.dropna(subset=['Date'])
+        
+        if df.empty:
+            return None, "Error: No valid dates found in file. Please ensure dates are like 06-04-2026."
+
+        # Convert numbers strictly
         for col in ['Income', 'Expense', 'Tips', 'Working Hours']:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
             else:
                 df[col] = 0.0
         
-        df = df.dropna(subset=['Date'])
-        return df, None
+        df['Description'] = df.get('Description', pd.Series(['Activity']*len(df))).fillna("Unknown")
+        df['Category'] = df.get('Category', pd.Series(['Others']*len(df))).fillna("Others")
+        
+        return df.sort_values('Date').reset_index(drop=True), None
     except Exception as e:
-        return None, f"Error: {e}"
+        return None, f"System Error: {e}"
 
         
         
