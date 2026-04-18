@@ -1,11 +1,10 @@
 import pandas as pd
-import numpy as pd_np
 import numpy as np
 
 def load_and_clean_data(file_or_df):
     """
     Loads a CSV file or DataFrame and cleans it.
-    Expected columns: Date, Income, Expense, Description
+    Features: Strict DD-MM-YYYY parsing and fuzzy column matching.
     """
     try:
         if isinstance(file_or_df, pd.DataFrame):
@@ -24,41 +23,40 @@ def load_and_clean_data(file_or_df):
         }
         df = df.rename(columns=col_map)
         
-        # Multi-stage date parser for maximum compatibility
+        # Multi-stage date parser for maximum compatibility (Forces April over June)
         def parse_dates(col):
             # Try strict DD-MM-YYYY first
             res = pd.to_datetime(col, format='%d-%m-%Y', errors='coerce')
             # If failed, try DD/MM/YYYY
             if res.isna().all():
                 res = pd.to_datetime(col, format='%d/%m/%Y', errors='coerce')
-            # Final fallback to standard pandas guessing
+            # Final fallback
             if res.isna().all():
                 res = pd.to_datetime(col, dayfirst=True, errors='coerce')
             return res
 
         df['Date'] = parse_dates(df['Date'])
         
-        # Handing missing values: Income and Expense defaults to 0
-        df['Income'] = pd.to_numeric(df['Income'], errors='coerce').fillna(0)
-        df['Expense'] = pd.to_numeric(df['Expense'], errors='coerce').fillna(0)
+        # Standardize Numbers
+        for col in ['Income', 'Expense', 'Tips', 'Working Hours']:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+            else:
+                df[col] = 0.0
         
-        if 'Tips' not in df.columns:
-            df['Tips'] = 0.0
-        df['Tips'] = pd.to_numeric(df['Tips'], errors='coerce').fillna(0)
-        
-        if 'Working Hours' not in df.columns:
-            df['Working Hours'] = 0.0
-        df['Working Hours'] = pd.to_numeric(df['Working Hours'], errors='coerce').fillna(0)
-        
-        # Drop rows where Date is NaT
+        # Safety: Drop rows without dates
         df = df.dropna(subset=['Date'])
         
-        # Fill missing descriptions
+        # Fill missing text
+        if 'Description' not in df.columns: df['Description'] = 'Activity'
         df['Description'] = df['Description'].fillna("Unknown")
+        
+        if 'Category' not in df.columns: df['Category'] = 'Others'
+        df['Category'] = df['Category'].fillna("Others")
         
         # Sort by date
         df = df.sort_values(by='Date').reset_index(drop=True)
         
         return df, None
     except Exception as e:
-        return None, f"Error processing file: {e}"
+        return None, f"Error processing: {e}"
