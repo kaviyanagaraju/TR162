@@ -161,6 +161,11 @@ if data is not None:
         with t1:
             fig_t = vis.plot_income_trend(daily_df, lean, thresh)
             if fig_t: st.plotly_chart(fig_t, use_container_width=True)
+            else: st.warning("No trend data available for these dates.")
+            
+            st.markdown("### 🗓️ Monthly Snapshot")
+            monthly_df = ana.monthly_aggregation(df)
+            st.dataframe(monthly_df, use_container_width=True, hide_index=True)
         with t2:
             fig_p = vis.plot_expense_distribution(df)
             if fig_p: st.plotly_chart(fig_p, use_container_width=True)
