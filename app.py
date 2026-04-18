@@ -44,7 +44,13 @@ if not st.session_state.authenticated:
             else:
                 st.info("No accounts found on this server yet. Please click 'Create Account' to get started!")
     with t_signup:
-        nu, np, fn = st.text_input("New User"), st.text_input("Pass", type="password"), st.text_input("Full Name")
+        nu = st.text_input("Choose Username")
+        np = st.text_input("Choose Password", type="password")
+        fn = st.text_input("Full Name")
+        age = st.number_input("Age", min_value=18, max_value=100, value=25)
+        gender = st.selectbox("Gender", ["Male", "Female", "Other"])
+        job = st.selectbox("Job / Gig Type", ["Delivery Partner", "Ride-share Driver", "Freelancer", "Manual Labor", "Other"])
+        
         if st.button("Create My Vault"):
             db_path = "users_database.csv"
             row = pd.DataFrame([{"username": nu, "password": np}])
@@ -52,20 +58,42 @@ if not st.session_state.authenticated:
                 all_u = pd.read_csv(db_path)
                 pd.concat([all_u, row]).to_csv(db_path, index=False)
             else: row.to_csv(db_path, index=False)
-            pd.DataFrame([{"Name": fn}]).to_csv(get_user_profile_file(nu), index=False)
-            st.success("Created! Login now.")
+            
+            # Save Full Profile
+            profile_data = {
+                "Name": fn,
+                "Age": age,
+                "Gender": gender,
+                "Job": job,
+                "Joined": str(datetime.date.today())
+            }
+            pd.DataFrame([profile_data]).to_csv(get_user_profile_file(nu), index=False)
+            st.success("Vault Created! You can now login.")
     st.stop()
 
 # --- 3. MAIN APP ---
 USER_ID = st.session_state.username
 LOCAL_SAVE_FILE = get_user_data_file(USER_ID)
-if os.path.exists(get_user_profile_file(USER_ID)):
-    user_name = pd.read_csv(get_user_profile_file(USER_ID)).iloc[0]['Name']
-else: user_name = USER_ID
+PROFILE_FILE = get_user_profile_file(USER_ID)
 
+if os.path.exists(PROFILE_FILE):
+    user_bio = pd.read_csv(PROFILE_FILE).iloc[0]
+else:
+    user_bio = {"Name": USER_ID, "Age": "N/A", "Gender": "N/A", "Job": "N/A"}
+
+# Sidebar Setup
 with st.sidebar:
-    st.title(f"👑 {user_name}")
-    if st.button("Exit Vault"): st.session_state.authenticated = False; st.rerun()
+    st.markdown(f"""
+        <div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <h2 style="margin:0;">👑 {user_bio['Name']}</h2>
+            <p style="margin:5px 0; color: #64748b;">💼 {user_bio['Job']}</p>
+            <p style="margin:0; font-size: 0.9em;">🎂 {user_bio['Age']} years | ⚧ {user_bio['Gender']}</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if st.button("Exit Vault"):
+        st.session_state.authenticated = False
+        st.rerun()
     st.markdown("---")
     sel_lang = st.selectbox("Language / மொழி", list(LANGUAGES.keys()))
     t = LANGUAGES[sel_lang]
