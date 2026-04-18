@@ -1,57 +1,35 @@
 import pandas as pd
-import numpy as np
 
 def daily_aggregation(df):
+    daily = df.groupby('Date').agg({
+        'Income': 'sum', 'Tips': 'sum', 'Expense': 'sum', 'Working Hours': 'sum'
+    }).reset_index()
+    return daily
+
+def monthly_aggregation(df):
     """
-    Aggregates data by day.
+    Summarizes data by month for the snapshot table.
     """
-    df_copy = df.copy()
-    df_copy['Date'] = pd.to_datetime(df_copy['Date']).dt.date
-    
-    if 'Working Hours' not in df_copy.columns:
-        df_copy['Working Hours'] = 0.0
-        
-    daily_summary = df_copy.groupby('Date').agg({
+    monthly = df.copy()
+    monthly['Month'] = monthly['Date'].dt.strftime('%B %Y')
+    summary = monthly.groupby(['Month']).agg({
         'Income': 'sum',
         'Tips': 'sum',
-        'Working Hours': 'sum',
         'Expense': 'sum'
     }).reset_index()
-    
-    # Bundle tips into total daily income for modeling and graphing
-    daily_summary['Income'] = daily_summary['Income'] + daily_summary['Tips']
-    
-    daily_summary['Date'] = daily_summary['Date'].astype(str)
-    daily_summary['Net_Savings'] = daily_summary['Income'] - daily_summary['Expense']
-    
-    return daily_summary
+    summary['Total Income'] = summary['Income'] + summary['Tips']
+    summary['Net Savings'] = summary['Total Income'] - summary['Expense']
+    return summary[['Month', 'Total Income', 'Expense', 'Net Savings']]
 
-def predict_future_income(daily_df, window=7):
-    """
-    Predicts next day's income using a Simple Moving Average (SMA) 
-    over the given window of days.
-    """
-    if len(daily_df) < 1:
-        return 0, 0
-    
-    if len(daily_df) < window:
-        window = len(daily_df)
-        
-    recent_income = daily_df['Income'].tail(window)
-    prediction = recent_income.mean()
-    volatility = recent_income.std() if len(recent_income) > 1 else 0
-    
-    return prediction, volatility
+def predict_future_income(daily_df):
+    if len(daily_df) < 2: return 0, 0
+    avg_income = (daily_df['Income'] + daily_df['Tips']).mean()
+    volatility = (daily_df['Income'] + daily_df['Tips']).std()
+    return avg_income, volatility
 
-def detect_lean_periods(daily_df, threshold_ratio=0.8):
-    """
-    Identifies days where income drops below a threshold (e.g., 80% of mean).
-    """
-    if len(daily_df) == 0:
-        return pd.DataFrame(), None
-        
-    mean_income = daily_df['Income'].mean()
-    threshold = mean_income * threshold_ratio
-    
-    lean_days = daily_df[daily_df['Income'] < threshold].copy()
+def detect_lean_periods(daily_df):
+    if daily_df.empty: return pd.DataFrame(), 0
+    combined = daily_df['Income'] + daily_df['Tips']
+    threshold = combined.mean() * 0.8
+    lean_days = daily_df[combined < threshold]
     return lean_days, threshold
